@@ -9,9 +9,13 @@ import org.springframework.web.bind.annotation.RestController;
 import nl.youngcapital.atm.combatsystem.CombatSystem;
 import nl.youngcapital.atm.combatsystem.FightableCharacter;
 import nl.youngcapital.atm.data.DataAccessObject;
+import nl.youngcapital.atm.events.ChestEvent;
 import nl.youngcapital.atm.events.Encounter;
 import nl.youngcapital.atm.events.Event;
+import nl.youngcapital.atm.inventory.InventoryManager;
+import nl.youngcapital.atm.itembehaviour.Lootable;
 import nl.youngcapital.atm.nonplayercharacters.NonPlayableCharacter;
+import nl.youngcapital.atm.nonplayercharacters.Shop;
 import nl.youngcapital.atm.player.Player;
 import nl.youngcapital.atm.world.Square;
 import nl.youngcapital.atm.world.World;
@@ -24,6 +28,7 @@ public class RestApi {
 	public final static String DEFAULT_TARGET_TAG = "target";
 	public final static String DEFAULT_WORLD_TAG = "world";
 	public final static String DEFAULT_COMBAT_TAG = "combat";
+	public final static String DEFAULT_SHOP_TAG = "shop";
 
 	public final static String lOGGED_IN_CHARACTER_FOUND_MESSAGE = "An active character is present, please save or logout and try again.";
 	public final static String NO_lOGGED_IN_CHARACTER_FOUND_MESSAGE = "no active player found, please login or create a character";
@@ -31,6 +36,7 @@ public class RestApi {
 
 	@RequestMapping("/load/{id}")
 	public String load(@PathVariable(value = "id") String id, HttpSession session) {
+
 		if (inCombat(session)) {
 			return IN_COMBAT_MESSAGE;
 		}
@@ -49,6 +55,7 @@ public class RestApi {
 
 	@RequestMapping("/save")
 	public String create(HttpSession session) {
+
 		if (inCombat(session)) {
 			return IN_COMBAT_MESSAGE;
 		}
@@ -98,8 +105,29 @@ public class RestApi {
 		return "logged out " + name;
 	}
 
+	@RequestMapping("/shop")
+	public String shop(HttpSession session) {
+
+		if (!hasPlayer(session)) {
+			return NO_lOGGED_IN_CHARACTER_FOUND_MESSAGE;
+		}
+		if (inCombat(session)) {
+			return IN_COMBAT_MESSAGE;
+		}
+		if (availableShop(session)) {
+
+		}
+
+		String name = ((Player) session.getAttribute(DEFAULT_PLAYER_TAG)).getPlayerData().getName();
+
+		session.invalidate();
+
+		return "logged out " + name;
+	}
+
 	@RequestMapping("/welcome")
 	public String welcome(HttpSession session) {
+
 		if (!hasPlayer(session)) {
 			return NO_lOGGED_IN_CHARACTER_FOUND_MESSAGE;
 		}
@@ -151,6 +179,7 @@ public class RestApi {
 		}
 		World world = getWorld(session);
 		Player p = ((Player) session.getAttribute(DEFAULT_PLAYER_TAG));
+
 		switch (direction.toLowerCase()) {
 
 		case "north":
@@ -183,11 +212,40 @@ public class RestApi {
 		if (!hasPlayer(session)) {
 			return NO_lOGGED_IN_CHARACTER_FOUND_MESSAGE;
 		}
+		if (inCombat(session)) {
+			return IN_COMBAT_MESSAGE;
+		}
 
 		World world = getWorld(session);
 		Player p = ((Player) session.getAttribute(DEFAULT_PLAYER_TAG));
 		return world.getPossibleDirections(p.getPlayerData().getX(), p.getPlayerData().getY(),
 				p.getPlayerData().getZ());
+	}
+
+	@RequestMapping("/getLoot")
+	public String lootableItems(HttpSession session) {
+		
+		if (!hasPlayer(session)) {
+			return NO_lOGGED_IN_CHARACTER_FOUND_MESSAGE;
+		}
+		if (inCombat(session)) {
+			return IN_COMBAT_MESSAGE;
+		}
+
+		Player p = ((Player) session.getAttribute(DEFAULT_PLAYER_TAG));
+		World world = getWorld(session);
+
+		Square sq = world.getSquare(p.getPlayerData().getX(), p.getPlayerData().getY(), p.getPlayerData().getZ());
+		
+		if (sq.getEvent() instanceof Lootable){
+			Lootable loot = (Lootable) sq.getEvent();
+			InventoryManager.getInstance().addItem(p.getPlayerData().getCs().getInventory(), loot.take());
+			
+		}else{
+			return "Failed to pick up item";
+		}
+		
+		return "You took the item" ;
 	}
 
 	@RequestMapping("/look")
@@ -219,9 +277,16 @@ public class RestApi {
 					sb.append("What do you do?");
 					session.setAttribute(DEFAULT_COMBAT_TAG, false);
 
+					if (en instanceof Shop) {
+						session.setAttribute(DEFAULT_SHOP_TAG, true);
+					} else {
+						session.setAttribute(DEFAULT_SHOP_TAG, false);
+					}
+
 				} else {
 					sb.append(en.getDescription() + " charges you! DEFEND!");
 					session.setAttribute(DEFAULT_COMBAT_TAG, true);
+					session.setAttribute(DEFAULT_SHOP_TAG, false);
 
 				}
 
@@ -243,6 +308,14 @@ public class RestApi {
 
 	}
 
+	private boolean availableShop(HttpSession session) {
+		if (session.getAttribute(DEFAULT_SHOP_TAG) == null) {
+			return false;
+		}
+
+		return (boolean) session.getAttribute(DEFAULT_SHOP_TAG);
+	}
+
 	private World getWorld(HttpSession session) {
 		if (session.getAttribute(DEFAULT_WORLD_TAG) == null) {
 			session.setAttribute(DEFAULT_WORLD_TAG, new World());
@@ -252,6 +325,7 @@ public class RestApi {
 	}
 
 	private boolean hasPlayer(HttpSession session) {
+
 		return session.getAttribute(DEFAULT_PLAYER_TAG) != null;
 	}
 }
