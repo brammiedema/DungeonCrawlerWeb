@@ -1,6 +1,7 @@
 package nl.youngcapital.atm.player;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import nl.youngcapital.atm.armor.Armor;
@@ -24,7 +25,7 @@ public class Player implements FightableCharacter {
 
 	private PlayerData playerData = new PlayerData();
 
-	private ArrayList<Effect> effects ;
+	private ArrayList<Effect> effects;
 	private static final Random RAN = new Random();
 
 	public Player(String name) {
@@ -35,14 +36,15 @@ public class Player implements FightableCharacter {
 		this.playerData.setCs(new CharacterSheet());
 		ArrayList<String> elements = new ArrayList<String>();
 		elements.add("fire");
-		InventoryManager.getInstance().setWeapon(this.playerData.getCs().getInventory(),
+		
+		InventoryManager.getInstance().addItem(this.playerData.getCs().getInventory(),
 				new Weapon("Wooden stick", "Blunt", 7, 4, 6, elements, new ArrayList<>(), true));
 
 	}
-		
+
 	public Player(PlayerData playerData) {
 		this.playerData = playerData;
-		
+
 	}
 
 	public int getBaseDamage() {
@@ -51,11 +53,11 @@ public class Player implements FightableCharacter {
 	}
 
 	public void useItem() {
-		
+
 	}
 
 	public Inventory showInventory() {
-		
+
 		return null;
 	}
 
@@ -105,14 +107,15 @@ public class Player implements FightableCharacter {
 
 	@Override
 	public int getArmor() {
+		Inventory playerInv = this.playerData.getCs().getInventory();
+		List<Armor> armors = InventoryManager.getInstance().getAllArmor(playerInv);
 
-		return InventoryManager.getInstance().getAllArmor(this.playerData.getCs().getInventory()).stream()
-				.filter(a -> a.isEquiped()).mapToInt(Armor::getArmor).sum();
+		return armors.stream().filter(a -> a.isEquiped()).mapToInt(Armor::getArmor).sum();
 	}
 
 	@Override
 	public void setEffect(Effect effect) {
-		this.effects.add(effect); 
+		this.effects.add(effect);
 
 	}
 
@@ -127,8 +130,8 @@ public class Player implements FightableCharacter {
 	@Override
 	public ArrayList<Element> getElements() {
 		ArrayList<Element> elements = new ArrayList<>();
-		for(Weapon weapon : this.getPlayerData().getCs().getInventory().getWeapons()){
-			for(String element : weapon.getElements()){
+		for (Weapon weapon : this.getPlayerData().getCs().getInventory().getWeapons()) {
+			for (String element : weapon.getElements()) {
 				switch (element) {
 				case "fire":
 					elements.add(new Fire());
@@ -145,36 +148,36 @@ public class Player implements FightableCharacter {
 				default:
 					break;
 				}
-				
+
 			}
 		}
-		
+
 		return elements;
 	}
 
 	@Override
 	public ArrayList<Effect> getEffects() {
 		ArrayList<Effect> effects = new ArrayList<>();
-		for(Weapon weapon : this.getPlayerData().getCs().getInventory().getWeapons()){
-			for(String effect : weapon.getEffects()){
+		for (Weapon weapon : this.getPlayerData().getCs().getInventory().getWeapons()) {
+			for (String effect : weapon.getEffects()) {
 				switch (effect) {
 				case "bleed":
 					effects.add(new Bleed());
-					break; 
+					break;
 				case "crushed":
 					effects.add(new Crushed());
 					break;
 				case "burn":
 					effects.add(new Burn());
 					break;
-		
+
 				default:
 					break;
 				}
-				
+
 			}
 		}
-		
+
 		return effects;
 	}
 
