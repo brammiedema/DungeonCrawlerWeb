@@ -18,5 +18,7 @@ public abstract class Square {
 	
 	public abstract boolean hasEvent();
 	
-	public abstract Event getEvent();
+	public abstract Event getEvent();	
+		
+	
 }

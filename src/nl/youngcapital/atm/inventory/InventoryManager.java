@@ -9,35 +9,35 @@ import nl.youngcapital.atm.weapon.Weapon;
 public class InventoryManager {
 
 	private static InventoryManager im;
-	
-	private InventoryManager(){
+
+	private InventoryManager() {
 		super();
-		
+
 	}
-	
-	public static InventoryManager getInstance(){
-		
-		if (im ==  null){
+
+	public static InventoryManager getInstance() {
+
+		if (im == null) {
 			im = new InventoryManager();
-			
+
 		}
-		
+
 		return im;
 	}
-	
+
 	public Weapon getWeapon(Inventory inventory, String name) {
 		for (Weapon weap : inventory.getWeapons()) {
 			if (weap.getName().equals(name)) {
 				return weap;
-				
+
 			}
 		}
 
 		return null;
 	}
-	
+
 	public List<Armor> getAllArmor(Inventory inventory) {
-	
+
 		return inventory.getArmors();
 	}
 
@@ -45,7 +45,7 @@ public class InventoryManager {
 		for (Armor arm : inventory.getArmors()) {
 			if (arm.getName().equals(name)) {
 				return arm;
-				
+
 			}
 		}
 
@@ -56,23 +56,24 @@ public class InventoryManager {
 		for (Consumable cons : inventory.getConsumables()) {
 			if (cons.getName().equals(name)) {
 				return cons;
-				
+
 			}
 		}
 
 		return null;
 	}
 
-	public void setWeapon(Inventory inventory, Weapon weapon){
-		System.out.println(weapon.getName());
-		inventory.getWeapons().add(weapon);
-	}
+	public void addItem(Inventory inventory, Object item) {
 
-	public void setArmor(Inventory inventory, Armor armor) {
-		inventory.getArmors().add(armor);
-	}
+		if (item instanceof Weapon) {
+			inventory.getWeapons().add((Weapon) item);
 
-	public void setConsumable(Inventory inventory, Consumable consumable) {
-		inventory.getConsumables().add(consumable);
+		} else if (item instanceof Armor) {
+			inventory.getArmors().add((Armor) item);
+
+		} else if (item instanceof Consumable) {
+			inventory.getConsumables().add((Consumable) item);
+		}
+
 	}
 }

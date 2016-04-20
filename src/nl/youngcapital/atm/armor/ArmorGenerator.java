@@ -27,7 +27,7 @@ public class ArmorGenerator {
 	 * 
 	 * @return {@link Armor}
 	 */
-	public Armor generateRandomArmor() {
+	static public Armor generateRandomArmor() {
 
 		
 		String type = getType();
@@ -39,7 +39,7 @@ public class ArmorGenerator {
 
 	}
 
-	public String getName(String type, int armor, int price) {
+	static private String getName(String type, int armor, int price) {
 		StringBuilder sb = new StringBuilder();
 		
 		if(type.equals("mail")){
@@ -56,7 +56,7 @@ public class ArmorGenerator {
 		return sb.toString();
 	}
 
-	public int getArmor(String type) {
+	static private int getArmor(String type) {
 		int armor = 0;
 		
 		if(type.equals("mail")){
@@ -72,11 +72,11 @@ public class ArmorGenerator {
 		return armor;
 	}
 
-	public String getType() {
+	static private String getType() {
 		return ARMOR_TYPES[RAN.nextInt(3)];
 	}
 
-	public int getPrice(String type) {
+	static private int getPrice(String type) {
 		int price = 0;
 		
 		if(type.equals("mail")){

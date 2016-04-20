@@ -2,6 +2,7 @@ package nl.youngcapital.atm.world;
 
 import java.util.Random;
 
+import nl.youngcapital.atm.events.ChestEvent;
 import nl.youngcapital.atm.events.Event;
 import nl.youngcapital.atm.events.MerchantEncounter;
 import nl.youngcapital.atm.events.TrollEncounter;
@@ -18,7 +19,7 @@ public class CaveSquare extends Square {
 		Random ran = new Random();
 
 		if ((ran.nextInt() % 3) == 1) {
-			switch (ran.nextInt(2)) {
+			switch (ran.nextInt(4)) {
 			case 0:
 				event = new MerchantEncounter();
 				break;
@@ -27,6 +28,9 @@ public class CaveSquare extends Square {
 				break;
 			case 2:
 				event = new TrollEncounter();
+				break;
+			case 3:
+				event = new ChestEvent();
 				break;
 			default:
 				break;

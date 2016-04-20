@@ -28,7 +28,7 @@ public class WeaponGenerator {
 		RAN = new Random(seed);
 	}
 
-	public Weapon generateRandomWeapon() {
+	static public Weapon generateRandomWeapon() {
 		List<String> elements = new ArrayList<>();
 		List<String> effects = new ArrayList<>();
 
@@ -47,7 +47,7 @@ public class WeaponGenerator {
 
 	}
 
-	private String getEffectName() {
+	static private String getEffectName() {
 		int efIndex = RAN.nextInt(10);
 
 		if (efIndex < 3) {
@@ -58,7 +58,7 @@ public class WeaponGenerator {
 		return null;
 	}
 
-	private List<String> getEffectNames() {
+	static private List<String> getEffectNames() {
 		int d20 = RAN.nextInt(20);
 		List<String> effects = new ArrayList<String>();
 		if (d20 > 15) {
@@ -74,7 +74,7 @@ public class WeaponGenerator {
 		return null;
 	}
 
-	private int getPrice(String weaponType) {
+	static private int getPrice(String weaponType) {
 		int price = 0;
 
 		if (weaponType.equals("sword")) {
@@ -86,7 +86,7 @@ public class WeaponGenerator {
 		return price;
 	}
 
-	private int getMaxDmg(String weaponType) {
+	static private int getMaxDmg(String weaponType) {
 
 		int maxDmg = 0;
 
@@ -99,7 +99,7 @@ public class WeaponGenerator {
 		return maxDmg;
 	}
 
-	private int getMinDmg(String weaponType) {
+	static private int getMinDmg(String weaponType) {
 		int minDmg = 0;
 
 		if (weaponType.equals("sword")) {
@@ -119,7 +119,7 @@ public class WeaponGenerator {
 	 * @param maxDmg
 	 * @return
 	 */
-	private String getName(String weaponType, List<String> elements, List<String> effects, int maxDmg) {
+	static private String getName(String weaponType, List<String> elements, List<String> effects, int maxDmg) {
 		StringBuilder name = new StringBuilder();
 
 		if (weaponType.equals("sword")) {
@@ -149,11 +149,11 @@ public class WeaponGenerator {
 		return name.toString();
 	}
 
-	private String getWeaponType() {
+	static private String getWeaponType() {
 		return WEAPON_TYPES[RAN.nextInt(WEAPON_TYPES.length)];
 	}
 
-	private String getElementType() {
+	static private String getElementType() {
 		int elIndex = RAN.nextInt(10);
 
 		if (elIndex < 4) {
@@ -164,7 +164,7 @@ public class WeaponGenerator {
 		return null;
 	}
 
-	private List<String> getElementTypes() {
+	static private List<String> getElementTypes() {
 		int d20 = RAN.nextInt(20);
 
 		List<String> effects = new ArrayList<String>();

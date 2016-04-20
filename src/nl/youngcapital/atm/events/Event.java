@@ -18,6 +18,7 @@ public abstract class Event {
 	public double getProbability() {
 		return probability;
 	}
+	
 	public void setProbability(double probability) {
 		this.probability = probability;
 	}
