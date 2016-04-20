@@ -6,14 +6,17 @@ import java.util.Random;
 import nl.youngcapital.atm.combatsystem.FightableCharacter;
 import nl.youngcapital.atm.effects.Effect;
 import nl.youngcapital.atm.elements.Element;
+import nl.youngcapital.atm.itembehaviour.Lootable;
+import nl.youngcapital.atm.itemgenerator.ItemGenerator;
 import nl.youngcapital.atm.nonplayercharacters.NonPlayableCharacter;
 
-public class Troll implements NonPlayableCharacter, FightableCharacter {
+public class Troll implements NonPlayableCharacter, FightableCharacter, Lootable {
 	private int healthPoints;
 	private ArrayList<Element> elements;
 	private ArrayList<Effect> effects;
 	private String description;
 	private int armor;
+	private Object item;
 	
 	private final static String DEFAULT_DESCRIPTION="IT IS A CUTE TROLL!"; 
 	private static final int MAX_HEALTH_POINTS = 41;
@@ -28,6 +31,7 @@ public class Troll implements NonPlayableCharacter, FightableCharacter {
 		effects = new ArrayList<>();
 		elements = new ArrayList<>();
 		armor = 14;
+		item = ItemGenerator.generateItem();
 	}
 	
 	public Troll(String description) {
@@ -84,6 +88,13 @@ public class Troll implements NonPlayableCharacter, FightableCharacter {
 	public boolean isFriendly() {
 
 		return false;
+	}
+
+	@Override
+	public Object take() {
+		
+		item = true;
+		return item;
 	}
 
 }

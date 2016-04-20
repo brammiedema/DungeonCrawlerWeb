@@ -12,12 +12,14 @@ import nl.youngcapital.atm.effects.Effect;
 import nl.youngcapital.atm.elements.Element;
 import nl.youngcapital.atm.inventory.Inventory;
 import nl.youngcapital.atm.inventory.InventoryManager;
+import nl.youngcapital.atm.itembehaviour.Lootable;
+import nl.youngcapital.atm.itemgenerator.ItemGenerator;
 import nl.youngcapital.atm.nonplayercharacters.NonPlayableCharacter;
 import nl.youngcapital.atm.nonplayercharacters.Shop;
 import nl.youngcapital.atm.weapon.Weapon;
 import nl.youngcapital.atm.weapon.WeaponGenerator;
 
-public class Merchant implements NonPlayableCharacter, Shop, FightableCharacter {
+public class Merchant implements NonPlayableCharacter, Shop, FightableCharacter, Lootable {
 	private Inventory inventory;
 	private int value;
 	private int healthPoints;
@@ -25,7 +27,9 @@ public class Merchant implements NonPlayableCharacter, Shop, FightableCharacter 
 	private ArrayList<Element> elements;
 	private ArrayList<Effect> effects;
 	private int armor;
-
+	private Object item;
+	
+	
 	private static final int MAXVALUE = 50;
 	private static final int MINVALUE = 30;
 	private final static String DEFAULT_DESCRIPTION = "a merchant selling valuebles.";
@@ -35,6 +39,8 @@ public class Merchant implements NonPlayableCharacter, Shop, FightableCharacter 
 	private static final int MIN_DAMAGE = 5;
 	private static final Random RAN = new Random();
 
+	
+	
 	public Merchant(String description) {
 		this();
 		this.description = description;
@@ -48,6 +54,7 @@ public class Merchant implements NonPlayableCharacter, Shop, FightableCharacter 
 		effects = new ArrayList<>();
 		elements = new ArrayList<>();
 		armor = 4;
+		item = ItemGenerator.generateItem();
 		fillInventory();
 	}
 
@@ -67,22 +74,22 @@ public class Merchant implements NonPlayableCharacter, Shop, FightableCharacter 
 
 				switch (itemTypePick) {
 				case 0:
-					Weapon weapon = new WeaponGenerator().generateRandomWeapon();
-					im.setWeapon(inventory, weapon);
+					Weapon weapon = WeaponGenerator.generateRandomWeapon();
+					im.addItem(inventory, weapon);
 
 					value += weapon.getPrice();
 					break;
 
 				case 1:
-					Armor armor = new ArmorGenerator().generateRandomArmor();
-					im.setArmor(inventory, armor);
+					Armor armor = ArmorGenerator.generateRandomArmor();
+					im.addItem(inventory, armor);
 
 					value += armor.getPrice();
 					break;
 
 				default:
-					Consumable consumable = new ConsumableGenerator().generateRandomConsumable();
-					im.setConsumable(inventory, consumable);
+					Consumable consumable = ConsumableGenerator.generateRandomConsumable();
+					im.addItem(inventory, consumable);
 
 					value += consumable.getPrice();
 					break;
@@ -147,39 +154,10 @@ public class Merchant implements NonPlayableCharacter, Shop, FightableCharacter 
 		return armor;
 	}
 
+	
 	@Override
-	public Weapon buyWeapon(String weaponName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Armor buyArmor(String armorName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Armor buyConsumable(String consumableName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void sellWeapon(Inventory inventory) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void sellArmor(Inventory inventory) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void sellConsumable(Inventory inventory) {
-		// TODO Auto-generated method stub
-
+	public Object take() {
+		item = true;
+		return item;
 	}
 }
