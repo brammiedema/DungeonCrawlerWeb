@@ -13,7 +13,7 @@ public class InventoryManager {
 	private InventoryManager() {
 		super();
 
-	}
+	} 
 
 	public static InventoryManager getInstance() {
 

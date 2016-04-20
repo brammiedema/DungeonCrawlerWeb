@@ -6,12 +6,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.gson.Gson;
+
 import nl.youngcapital.atm.combatsystem.CombatSystem;
 import nl.youngcapital.atm.combatsystem.FightableCharacter;
 import nl.youngcapital.atm.data.DataAccessObject;
 import nl.youngcapital.atm.events.ChestEvent;
 import nl.youngcapital.atm.events.Encounter;
 import nl.youngcapital.atm.events.Event;
+import nl.youngcapital.atm.inventory.Inventory;
 import nl.youngcapital.atm.inventory.InventoryManager;
 import nl.youngcapital.atm.itembehaviour.Lootable;
 import nl.youngcapital.atm.nonplayercharacters.NonPlayableCharacter;
@@ -29,11 +32,13 @@ public class RestApi {
 	public final static String DEFAULT_WORLD_TAG = "world";
 	public final static String DEFAULT_COMBAT_TAG = "combat";
 	public final static String DEFAULT_SHOP_TAG = "shop";
+	public final static String DEFAULT_CHEST_TAG = "CHEST";
 
 	public final static String lOGGED_IN_CHARACTER_FOUND_MESSAGE = "An active character is present, please save or logout and try again.";
 	public final static String NO_lOGGED_IN_CHARACTER_FOUND_MESSAGE = "no active player found, please login or create a character";
 	public final static String IN_COMBAT_MESSAGE = "you are in combat resolve before taking this action";
-
+	public final static String NO_SHOP_MESSAGE = "You are not in a shop";
+	
 	@RequestMapping("/load/{id}")
 	public String load(@PathVariable(value = "id") String id, HttpSession session) {
 
@@ -115,14 +120,19 @@ public class RestApi {
 			return IN_COMBAT_MESSAGE;
 		}
 		if (availableShop(session)) {
-
+			return NO_SHOP_MESSAGE;
 		}
-
-		String name = ((Player) session.getAttribute(DEFAULT_PLAYER_TAG)).getPlayerData().getName();
-
-		session.invalidate();
-
-		return "logged out " + name;
+		
+		NonPlayableCharacter npc = (NonPlayableCharacter) session.getAttribute(DEFAULT_NPC_TAG);
+		
+		if(!(npc instanceof Shop)){
+			return NO_SHOP_MESSAGE;
+		}
+		Shop shop  = (Shop) npc;
+		Inventory inv = shop.getInventory();
+		Gson gs = new Gson();
+		
+		return gs.toJson(inv);
 	}
 
 	@RequestMapping("/welcome")
@@ -290,6 +300,11 @@ public class RestApi {
 
 				}
 
+			} else if(ev instanceof ChestEvent){
+				ChestEvent ce =  (ChestEvent) ev;
+				session.setAttribute(DEFAULT_CHEST_TAG, true);
+				
+				sb.append(ce.getDescription());
 			}
 		} else {
 			sb.append("There is nothing to do.");
