@@ -18,20 +18,29 @@
 <title>Super fun text adventure!</title>
 </head>
 <body>
-
-
 	<div class="container bs-docs-container" role="main">
+
+		<jsp:include page="/includes/modal.jsp" />
 		<div id="wrapper" class="toggled">
-			<jsp:include page="/includes/menu.jsp" />
+
+			<div id="sidebar-wrapper" class="toggled">
+				<jsp:include page="/includes/menu.jsp" />
+			</div>
+
+
+			<div>
+				<a id="menu-toggle" class="pull-right" href="#menu-toggle"><span
+					class="glyphicon glyphicon-align-justify" aria-hidden="true"></span></a>
+			</div>
+			
 			<div id="page-content-wrapper" class="col-md-8">
 				<div class="panel panel-default">
-
 					<div id="game_input_panel" class="panel-body">
-						<p id="game_input">Game Input<br /></p>
+						<p id="game_input">
+							
+						</p>
 					</div>
-
 				</div>
-
 				<jsp:include page="/includes/buttons.jsp" />
 			</div>
 		</div>

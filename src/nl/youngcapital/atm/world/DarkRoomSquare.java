@@ -1,11 +1,7 @@
 package nl.youngcapital.atm.world;
 
-import java.util.Random;
-
-import nl.youngcapital.atm.events.ChestEvent;
 import nl.youngcapital.atm.events.Event;
-import nl.youngcapital.atm.events.MerchantEncounter;
-import nl.youngcapital.atm.events.TrollEncounter;
+import nl.youngcapital.atm.events.RandomEventGenerator;
 
 public class DarkRoomSquare extends Square {
 
@@ -16,28 +12,7 @@ public class DarkRoomSquare extends Square {
 	public DarkRoomSquare() {
 		this.description = DEFAULT_DESCRIPTION;
 
-		Random ran = new Random();
-
-		if ((ran.nextInt() % 3) == 1) {
-			switch (ran.nextInt(4)) {
-			case 0:
-				event = new MerchantEncounter();
-				break;
-			case 1:
-				event = new TrollEncounter();
-				break;
-			case 2:
-				event = new TrollEncounter();
-				break;
-			case 3:
-				event = new ChestEvent();
-				break;
-			default:
-				break;
-			}
-		} else {
-			event = null;
-		}
+		event = RandomEventGenerator.generateRandomEvent();
 	}
 
 	public DarkRoomSquare(String description) {

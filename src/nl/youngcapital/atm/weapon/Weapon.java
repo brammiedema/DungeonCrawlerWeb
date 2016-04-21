@@ -9,11 +9,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 
 import org.hibernate.annotations.GenericGenerator;
-
-import nl.youngcapital.atm.inventory.Inventory;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 @Entity
 public class Weapon {
@@ -29,7 +28,11 @@ public class Weapon {
 
 	private List<String> effects;
 	private List<String> elements;
-
+	
+	public Weapon(){
+		
+	}
+	
 	/**
 	 * Generates an equiped weapon with the stats given
 	 * 
@@ -129,6 +132,7 @@ public class Weapon {
 		this.id = id;
 	}
 
+	@LazyCollection(LazyCollectionOption.FALSE)
 	@ElementCollection
 	@CollectionTable(name = "Effects", joinColumns = @JoinColumn(name = "weapon_id"))
 	@Column(name = "effects")
@@ -141,6 +145,7 @@ public class Weapon {
 		this.effects = effects;
 	}
 
+	@LazyCollection(LazyCollectionOption.FALSE)
 	@ElementCollection
 	@CollectionTable(name = "Elements", joinColumns = @JoinColumn(name = "weapon_id"))
 	@Column(name = "elements")

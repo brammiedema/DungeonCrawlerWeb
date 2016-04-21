@@ -17,6 +17,24 @@ $(document).ready(function() {
 
 	});
 	
+	$("#save").click(function (e){
+		
+		$.get("api/save", function(data) {
+			$("#game_input").append(data + "<br />");
+			updateScroll();
+		});
+		
+	});
+	
+	$("#attack").click(function (e){
+		
+		$.get("api/attack", function(data) {
+			$("#game_input").append(data + "<br />");
+			updateScroll();
+		});
+		
+	});
+	
 	$("#move_north_button").click(function(e) {
 
 		$.get("api/move?direction=north", function(data) {
@@ -25,6 +43,7 @@ $(document).ready(function() {
 		});
 
 	});
+	
 	$("#move_east_button").click(function(e) {
 
 		$.get("api/move?direction=east", function(data) {
@@ -33,6 +52,7 @@ $(document).ready(function() {
 		});
 
 	});
+	
 	$("#move_west_button").click(function(e) {
 
 		$.get("api/move?direction=west", function(data) {
@@ -41,6 +61,7 @@ $(document).ready(function() {
 		});
 
 	});
+	
 	$("#move_south_button").click(function(e) {
 
 		$.get("api/move?direction=south", function(data) {
@@ -50,7 +71,6 @@ $(document).ready(function() {
 
 	});
 	
-
 	$("#look").click(function(e) {
 
 		$.get("api/look", function(data) {
@@ -69,19 +89,37 @@ $(document).ready(function() {
 
 	});
 
-	$("#load").click(function(e) {
+	target = "";
 
-		var id = prompt("Please enter your id", "1");
-		if (id != null) {
-
-			$.get("api/load/" + id, function(data) {
-				$("#game_input").append(data + "<br />");
-				updateScroll();
-			});
-
-		}
-
+	$("#load").click(function(e){
+	  $("#myModal").modal("show");
+	  target = "load";
+	  
 	});
+
+	$("#create").click(function(e){
+	  $("#myModal").modal("show");
+	  
+	  target = "create";
+	});
+
+
+
+	$("#submit_name").click(function(e){
+	  var name = $("#submit_name_value").val();
+	  
+	  
+	  $.get("api/" + target + "?name=" + name, function(data) {
+				$("#game_input").append(data + "<br />");
+				
+		});
+	  target=undefined;
+	  $("#myModal").modal("hide");
+	  $("#submit_name_value").val = "";
+	  updateScroll();
+	});
+
+
 
 	$("#logout").click(function(e) {
 

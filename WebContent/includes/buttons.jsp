@@ -28,13 +28,14 @@
 
 		<!-- dynamic introduce options? -->
 		<ul class="dropdown-menu">
-			<li><a id="move_north_button">North</a></li>
-			<li><a id="move_east_button">East</a></li>
-			<li><a id="move_south_button">South</a></li>
-			<li><a id="move_west_button">West</a></li>
+			<li><a id="">action</a></li>
+			<li><a id="">action</a></li>
+			<li><a id="">action</a></li>
+			<li><a id="">action</a></li>
 		</ul>
 	</div>
 	<div>
-		<button type="button" class="btn btn-danger">Attack</button>
+		<button id="attack" type="button" class="btn btn-danger">Attack</button>
 	</div>
+	
 </div>

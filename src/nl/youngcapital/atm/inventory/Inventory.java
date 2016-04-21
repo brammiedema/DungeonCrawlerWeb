@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -12,6 +13,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import nl.youngcapital.atm.armor.Armor;
 import nl.youngcapital.atm.consumables.Consumable;
@@ -28,7 +31,8 @@ public class Inventory {
 	private List<Consumable> consumables = new ArrayList<>();
 
 	private long id;
-
+	
+	@LazyCollection(LazyCollectionOption.FALSE)
 	@OneToMany(cascade = {CascadeType.ALL})
 	@JoinColumn(name = "inventory_id")
 	public List<Weapon> getWeapons() {
@@ -38,7 +42,7 @@ public class Inventory {
 	public void setWeapons(List<Weapon> weapons) {
 		this.weapons = weapons;
 	}
-
+	@LazyCollection(LazyCollectionOption.FALSE)
 	@OneToMany(cascade = {CascadeType.ALL})
 	@JoinColumn(name = "inventory_id")
 	public List<Armor> getArmors() {
@@ -48,8 +52,9 @@ public class Inventory {
 	public void setArmors(List<Armor> armors) {
 		this.armors = armors;
 	}
-
-	@OneToMany(cascade = {CascadeType.ALL})
+	
+	@LazyCollection(LazyCollectionOption.FALSE)
+	@OneToMany(cascade = {CascadeType.ALL}, fetch=FetchType.EAGER)
 	@JoinColumn(name = "inventory_id")
 	public List<Consumable> getConsumables() {
 		return consumables;

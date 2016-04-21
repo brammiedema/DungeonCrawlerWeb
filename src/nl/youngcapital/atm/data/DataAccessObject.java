@@ -1,49 +1,67 @@
 package nl.youngcapital.atm.data;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.Persistence;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import nl.youngcapital.atm.player.PlayerData;
 
-public abstract class DataAccessObject {
+@Repository
+public class DataAccessObject {
 
-	final private static EntityManagerFactory emf = Persistence.createEntityManagerFactory("dungeoncrawler");
+	@PersistenceContext
+	private EntityManager em;
 
-	public static void create(PlayerData pd) {
-
-		System.out.println("create player entity");
-		EntityManager em = emf.createEntityManager();
-		EntityTransaction t = em.getTransaction();
-		t.begin();
-
-		if (pd.getId() == null || findById(pd.getId()).equals(null)) {
+	@Transactional
+	public boolean create(PlayerData pd) {
+		if (pd == null) {
+			throw new IllegalStateException();
+		}
+		if (findByName(pd.getName()) == null) {
 			em.persist(pd);
+			return true;
 		} else {
-			pd = em.merge(pd);
+			return false;
 		}
 
-		t.commit();
-		em.close();
 	}
 
-	public static PlayerData findById(long id) {
-		EntityManager em = emf.createEntityManager();
-		EntityTransaction t = em.getTransaction();
-		t.begin();
-		PlayerData pd = (PlayerData) em.find(PlayerData.class, id);
-		t.commit();
-		em.close();
+	@Transactional
+	public PlayerData findById(long id) {
+
+		PlayerData pd = em.find(PlayerData.class, id);
+
 		return pd;
 	}
 
-	public static void update(PlayerData sp) {
-		EntityManager em = emf.createEntityManager();
-		EntityTransaction t = em.getTransaction();
-		sp = em.merge(sp);
-		t.commit();
-		em.close();
+	@Transactional
+	public PlayerData findByName(String name) {
+		Query q =  em.createQuery("SELECT pd FROM PlayerData pd WHERE pd.name LIKE :name")
+				.setParameter("name", name);
+		PlayerData pd = null;
+		try {
+			pd = (PlayerData) q.getSingleResult();
+		} catch (Exception e) {
+
+		}
+		
+		
+		return pd;
+	}
+
+	@Transactional
+	public void delete(PlayerData pd) {
+		em.remove(em.contains(pd) ? pd : em.merge(pd));
+
+	}
+
+	@Transactional
+	public void update(PlayerData pd) {
+		em.merge(pd);
+
 	}
 
 }

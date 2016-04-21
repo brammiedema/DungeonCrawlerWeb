@@ -40,6 +40,10 @@ public class Armor {
 		
 	}
 	
+	public Armor(){
+		
+	}
+	
 	public String getName() {
 		return name;
 	}

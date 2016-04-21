@@ -24,6 +24,10 @@ public class Consumable {
 		this.price = price;
 	}
 	
+	public Consumable(){
+		
+	}
+	
 	public String getName() {
 		return name;
 	}
