@@ -16,25 +16,25 @@ $(document).ready(function() {
 		}
 
 	});
-	
-	$("#save").click(function (e){
-		
+
+	$("#save").click(function(e) {
+
 		$.get("api/save", function(data) {
 			$("#game_input").append(data + "<br />");
 			updateScroll();
 		});
-		
+
 	});
-	
-	$("#attack").click(function (e){
-		
+
+	$("#attack").click(function(e) {
+
 		$.get("api/attack", function(data) {
 			$("#game_input").append(data + "<br />");
 			updateScroll();
 		});
-		
+
 	});
-	
+
 	$("#move_north_button").click(function(e) {
 
 		$.get("api/move?direction=north", function(data) {
@@ -43,7 +43,7 @@ $(document).ready(function() {
 		});
 
 	});
-	
+
 	$("#move_east_button").click(function(e) {
 
 		$.get("api/move?direction=east", function(data) {
@@ -52,7 +52,7 @@ $(document).ready(function() {
 		});
 
 	});
-	
+
 	$("#move_west_button").click(function(e) {
 
 		$.get("api/move?direction=west", function(data) {
@@ -62,6 +62,10 @@ $(document).ready(function() {
 
 	});
 	
+	$("#close_inventory_button").click(function(e) {
+		$("#inventory_jumbotron").hide();
+	});
+
 	$("#move_south_button").click(function(e) {
 
 		$.get("api/move?direction=south", function(data) {
@@ -70,7 +74,7 @@ $(document).ready(function() {
 		});
 
 	});
-	
+
 	$("#look").click(function(e) {
 
 		$.get("api/look", function(data) {
@@ -91,35 +95,30 @@ $(document).ready(function() {
 
 	target = "";
 
-	$("#load").click(function(e){
-	  $("#myModal").modal("show");
-	  target = "load";
-	  
+	$("#load").click(function(e) {
+		$("#myModal").modal("show");
+		target = "load";
+
 	});
 
-	$("#create").click(function(e){
-	  $("#myModal").modal("show");
-	  
-	  target = "create";
+	$("#create").click(function(e) {
+		$("#myModal").modal("show");
+
+		target = "create";
 	});
 
+	$("#submit_name").click(function(e) {
+		var name = $("#submit_name_value").val();
 
+		$.get("api/" + target + "?name=" + name, function(data) {
+			$("#game_input").append(data + "<br />");
 
-	$("#submit_name").click(function(e){
-	  var name = $("#submit_name_value").val();
-	  
-	  
-	  $.get("api/" + target + "?name=" + name, function(data) {
-				$("#game_input").append(data + "<br />");
-				
 		});
-	  target=undefined;
-	  $("#myModal").modal("hide");
-	  $("#submit_name_value").val = "";
-	  updateScroll();
+		target = undefined;
+		$("#myModal").modal("hide");
+		$("#submit_name_value").val = "";
+		updateScroll();
 	});
-
-
 
 	$("#logout").click(function(e) {
 

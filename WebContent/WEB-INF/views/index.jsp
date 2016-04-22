@@ -41,7 +41,8 @@
 						</p>
 					</div>
 				</div>
-				<jsp:include page="/includes/buttons.jsp" />
+				<jsp:include page="/includes/buttons.jsp" /> 
+				<jsp:include page="/includes/jumbotron.jsp" />
 			</div>
 		</div>
 	</div>

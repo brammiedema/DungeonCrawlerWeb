@@ -12,6 +12,8 @@ import org.hibernate.annotations.GenericGenerator;
 
 @Entity
 public class PlayerData {
+	
+	private String currentSessionId;
 	private String name;
 	private int x;
 	private int y;
@@ -86,6 +88,14 @@ public class PlayerData {
 
 	public void setId(long id) {
 		this.id = id;
+	}
+
+	public String getCurrentSessionId() {
+		return currentSessionId;
+	}
+
+	public void setCurrentSessionId(String sessionId) {
+		this.currentSessionId = sessionId;
 	}
 	
 	

@@ -1,9 +1,9 @@
 package nl.youngcapital.atm.rest;
 
+import javax.annotation.PreDestroy;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,7 +28,7 @@ import nl.youngcapital.atm.world.World;
 @RequestMapping("/api")
 @RestController
 public class RestApi {
-	public final static String DEFAULT_ID_TAG = "player";
+	public final static String DEFAULT_PLAYER_ID_TAG = "player";
 	public final static String DEFAULT_NPC_TAG = "npc";
 	public final static String DEFAULT_TARGET_TAG = "target";
 	public final static String DEFAULT_WORLD_TAG = "world";
@@ -42,41 +42,55 @@ public class RestApi {
 	public final static String NO_SHOP_MESSAGE = "You are not in a shop";
 	public final static String PLAYER_NOT_FOUND = "Player not found";
 	public final static String PLAYER_LOADED = "Load successful";
+	public final static String PLAYER_ALREADY_LOADED = "Player is already loaded";
+	public final static String PLAYER_ALREADY_REMOTELY_LOADED = "Player is already loaded else where";
 
-	
-	
-	
+	@Autowired
+	private DataAccessObject dao;
+	private Player p;
+
 	private Player getPlayer(String name) {
-		PlayerData pd = Dao.findByName(name);
-		Player p = new Player(pd);
+		
+		PlayerData pd = dao.findByName(name);
+		this.p = new Player(pd);
 
 		return p;
 	}
 
-	@Autowired
-	private DataAccessObject Dao;
+	public void resetSession() {
+		
+		p.getPlayerData().setCurrentSessionId(null);
+		dao.update(p.getPlayerData());
+	}
 
-	
 	@RequestMapping("/load")
-	public String load( String name, HttpSession session) {
-
+	public String load(String name, HttpSession session) {
+		
+		session.setAttribute("dao", dao);
+		
 		if (inCombat(session)) {
 			return IN_COMBAT_MESSAGE;
 		}
-		if (hasPlayer(session)) {
-			return NO_lOGGED_IN_CHARACTER_FOUND_MESSAGE;
-		}
 
-		PlayerData pd = Dao.findByName(name);
-
+		PlayerData pd = dao.findByName(name);
 		if (pd == null) {
 			return PLAYER_NOT_FOUND;
 		}
 
-		session.setAttribute(DEFAULT_ID_TAG, name);
+		if (pd.getCurrentSessionId() == null || pd.getCurrentSessionId().isEmpty()) {
+			pd.setCurrentSessionId(session.getId());
+			dao.update(pd);
+			session.setAttribute(DEFAULT_PLAYER_ID_TAG, name);
 
-		return PLAYER_LOADED;
+			return PLAYER_LOADED;
 
+		} else if (pd.getCurrentSessionId().equals(session.getId())) {
+			
+			return PLAYER_ALREADY_LOADED;
+		} else {
+			
+			return PLAYER_NOT_FOUND;
+		}
 	}
 
 	@RequestMapping("/save")
@@ -89,9 +103,9 @@ public class RestApi {
 			return NO_lOGGED_IN_CHARACTER_FOUND_MESSAGE;
 		}
 
-		Player p = getPlayer((String) session.getAttribute(DEFAULT_ID_TAG));
+		Player p = getPlayer((String) session.getAttribute(DEFAULT_PLAYER_ID_TAG));
 
-		Dao.update(p.getPlayerData());
+		dao.update(p.getPlayerData());
 
 		return "player saved: " + p.getPlayerData().getName();
 	}
@@ -102,21 +116,19 @@ public class RestApi {
 		if (hasPlayer(session)) {
 			return lOGGED_IN_CHARACTER_FOUND_MESSAGE;
 		}
-		
+
 		if (inCombat(session)) {
 			return IN_COMBAT_MESSAGE;
 		}
 
 		Player p = new Player(name);
-		
-		if(Dao.create(p.getPlayerData()))
-		{
-			return "Thanks for making the character named: "
-					+ p.getPlayerData().getName();
-		}else{
+
+		if (dao.create(p.getPlayerData())) {
+			return "Thanks for making the character named: " + p.getPlayerData().getName();
+		} else {
 			return "Something went wrong, please try another name.";
 		}
-		
+
 	}
 
 	@RequestMapping("/logout")
@@ -129,7 +141,13 @@ public class RestApi {
 			return IN_COMBAT_MESSAGE;
 		}
 
-		String name = getPlayer((String) session.getAttribute(DEFAULT_ID_TAG)).getPlayerData().getName();
+		PlayerData pd = getPlayer((String) session.getAttribute(DEFAULT_PLAYER_ID_TAG)).getPlayerData();
+
+		pd.setCurrentSessionId(null);
+
+		dao.update(pd);
+
+		String name = pd.getName();
 
 		session.invalidate();
 
@@ -154,7 +172,7 @@ public class RestApi {
 		if (!(npc instanceof Shop)) {
 			return NO_SHOP_MESSAGE;
 		}
-		
+
 		Shop shop = (Shop) npc;
 		Inventory inv = shop.getInventory();
 		Gson gs = new Gson();
@@ -172,8 +190,8 @@ public class RestApi {
 			return IN_COMBAT_MESSAGE;
 		}
 
-		System.out.println(getPlayer((String) session.getAttribute(DEFAULT_ID_TAG)).getPlayerData().getName());
-		return "welcome, " + ((Player) session.getAttribute(DEFAULT_ID_TAG)).getPlayerData().getName();
+		System.out.println(getPlayer((String) session.getAttribute(DEFAULT_PLAYER_ID_TAG)).getPlayerData().getName());
+		return "welcome, " + ((Player) session.getAttribute(DEFAULT_PLAYER_ID_TAG)).getPlayerData().getName();
 	}
 
 	@RequestMapping("/attack")
@@ -183,36 +201,36 @@ public class RestApi {
 			return NO_lOGGED_IN_CHARACTER_FOUND_MESSAGE;
 		}
 
-		Player p = getPlayer((String) session.getAttribute(DEFAULT_ID_TAG));
-		if(null != session.getAttribute(DEFAULT_NPC_TAG) ){
-			
-		
-		NonPlayableCharacter t = (NonPlayableCharacter) session.getAttribute(DEFAULT_NPC_TAG);
+		Player p = getPlayer((String) session.getAttribute(DEFAULT_PLAYER_ID_TAG));
+		if (null != session.getAttribute(DEFAULT_NPC_TAG)) {
 
-		CombatSystem cs = CombatSystem.getInstance();
+			NonPlayableCharacter t = (NonPlayableCharacter) session.getAttribute(DEFAULT_NPC_TAG);
 
-		if (p.getHealth() < 0) {
-			Dao.delete(p.getPlayerData());
-			session.invalidate();
-			return "you are dead, only hardcore mode available your data has been deleted.... or is it?";
-		} else if (t.getHealth() < 0) {
+			CombatSystem cs = CombatSystem.getInstance();
 
-			return "Your enemy falls before you.";
-		}
+			if (p.getHealth() < 0) {
+				dao.delete(p.getPlayerData());
+				session.invalidate();
+				return "you are dead, only hardcore mode available your data has been deleted.... or is it?";
+			} else if (t.getHealth() < 0) {
 
-		cs.fight(p, t);
-		cs.fight(t, p);
-		
-		Dao.update(p.getPlayerData());
-		
-		return "the outcome is: player hp: " + p.getHealth() + " target hp: " + t.getHealth();
-		} else{
+				return "Your enemy falls before you.";
+			}
+
+			cs.fight(p, t);
+			cs.fight(t, p);
+
+			dao.update(p.getPlayerData());
+
+			return "the outcome is: player hp: " + p.getHealth() + " target hp: " + t.getHealth();
+		} else {
 			return "You don't feel like suicide";
 		}
 	}
 
 	@RequestMapping("/reset")
 	public void reset(HttpSession session) {
+		
 		session.invalidate();
 
 	}
@@ -224,7 +242,7 @@ public class RestApi {
 			return NO_lOGGED_IN_CHARACTER_FOUND_MESSAGE;
 		}
 		World world = getWorld(session);
-		Player p = getPlayer((String) session.getAttribute(DEFAULT_ID_TAG));
+		Player p = getPlayer((String) session.getAttribute(DEFAULT_PLAYER_ID_TAG));
 
 		switch (direction.toLowerCase()) {
 
@@ -247,9 +265,9 @@ public class RestApi {
 		default:
 			break;
 		}
-		
-		Dao.update(p.getPlayerData());
-		
+
+		dao.update(p.getPlayerData());
+
 		return world.getSquare(p.getPlayerData().getX(), p.getPlayerData().getY(), p.getPlayerData().getZ())
 				.getDescription();
 	}
@@ -265,7 +283,7 @@ public class RestApi {
 		}
 
 		World world = getWorld(session);
-		Player p = getPlayer((String) session.getAttribute(DEFAULT_ID_TAG));
+		Player p = getPlayer((String) session.getAttribute(DEFAULT_PLAYER_ID_TAG));
 		return world.getPossibleDirections(p.getPlayerData().getX(), p.getPlayerData().getY(),
 				p.getPlayerData().getZ());
 	}
@@ -280,7 +298,7 @@ public class RestApi {
 			return IN_COMBAT_MESSAGE;
 		}
 
-		Player p = getPlayer((String) session.getAttribute(DEFAULT_ID_TAG));
+		Player p = getPlayer((String) session.getAttribute(DEFAULT_PLAYER_ID_TAG));
 		World world = getWorld(session);
 
 		Square sq = world.getSquare(p.getPlayerData().getX(), p.getPlayerData().getY(), p.getPlayerData().getZ());
@@ -292,7 +310,7 @@ public class RestApi {
 		} else {
 			return "Failed to pick up item";
 		}
-		Dao.update(p.getPlayerData());
+		dao.update(p.getPlayerData());
 		return "You took the item";
 	}
 
@@ -302,10 +320,14 @@ public class RestApi {
 		if (!hasPlayer(session)) {
 			return NO_lOGGED_IN_CHARACTER_FOUND_MESSAGE;
 		}
+		if (inCombat(session)) {
+			return IN_COMBAT_MESSAGE;
+		}
+
 		StringBuilder sb = new StringBuilder();
 
-		Player p = getPlayer((String) session.getAttribute(DEFAULT_ID_TAG));
-		
+		Player p = getPlayer((String) session.getAttribute(DEFAULT_PLAYER_ID_TAG));
+
 		World world = getWorld(session);
 
 		Square sq = world.getSquare(p.getPlayerData().getX(), p.getPlayerData().getY(), p.getPlayerData().getZ());
@@ -363,6 +385,7 @@ public class RestApi {
 	}
 
 	private boolean availableShop(HttpSession session) {
+
 		if (session.getAttribute(DEFAULT_SHOP_TAG) == null) {
 			return false;
 		}
@@ -371,6 +394,7 @@ public class RestApi {
 	}
 
 	private World getWorld(HttpSession session) {
+
 		if (session.getAttribute(DEFAULT_WORLD_TAG) == null) {
 			System.out.println("nw world");
 			session.setAttribute(DEFAULT_WORLD_TAG, new World());
@@ -380,7 +404,7 @@ public class RestApi {
 	}
 
 	private boolean hasPlayer(HttpSession session) {
-		
-		return session.getAttribute(DEFAULT_ID_TAG) != null;
+
+		return session.getAttribute(DEFAULT_PLAYER_ID_TAG) != null;
 	}
 }
