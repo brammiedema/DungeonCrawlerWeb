@@ -1,6 +1,5 @@
 package nl.youngcapital.atm.rest;
 
-import javax.annotation.PreDestroy;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,10 +46,11 @@ public class RestApi {
 
 	@Autowired
 	private DataAccessObject dao;
+	
 	private Player p;
 
 	private Player getPlayer(String name) {
-		
+
 		PlayerData pd = dao.findByName(name);
 		this.p = new Player(pd);
 
@@ -58,16 +58,16 @@ public class RestApi {
 	}
 
 	public void resetSession() {
-		
+
 		p.getPlayerData().setCurrentSessionId(null);
 		dao.update(p.getPlayerData());
 	}
 
 	@RequestMapping("/load")
 	public String load(String name, HttpSession session) {
-		
+
 		session.setAttribute("dao", dao);
-		
+
 		if (inCombat(session)) {
 			return IN_COMBAT_MESSAGE;
 		}
@@ -85,10 +85,10 @@ public class RestApi {
 			return PLAYER_LOADED;
 
 		} else if (pd.getCurrentSessionId().equals(session.getId())) {
-			
+
 			return PLAYER_ALREADY_LOADED;
 		} else {
-			
+
 			return PLAYER_NOT_FOUND;
 		}
 	}
@@ -180,6 +180,25 @@ public class RestApi {
 		return gs.toJson(inv);
 	}
 
+	@RequestMapping("/inventory")
+	public String inventory(HttpSession session) {
+
+		if (!hasPlayer(session)) {
+			return NO_lOGGED_IN_CHARACTER_FOUND_MESSAGE;
+		}
+		if (inCombat(session)) {
+			return IN_COMBAT_MESSAGE;
+		}
+		Player pd = getPlayer((String) session.getAttribute(DEFAULT_PLAYER_ID_TAG));
+
+		Gson gs = new Gson();
+
+		System.out.println("stuff");
+
+		return gs.toJson(pd.getInventory());
+
+	}
+
 	@RequestMapping("/welcome")
 	public String welcome(HttpSession session) {
 
@@ -202,6 +221,7 @@ public class RestApi {
 		}
 
 		Player p = getPlayer((String) session.getAttribute(DEFAULT_PLAYER_ID_TAG));
+
 		if (null != session.getAttribute(DEFAULT_NPC_TAG)) {
 
 			NonPlayableCharacter t = (NonPlayableCharacter) session.getAttribute(DEFAULT_NPC_TAG);
@@ -230,7 +250,7 @@ public class RestApi {
 
 	@RequestMapping("/reset")
 	public void reset(HttpSession session) {
-		
+
 		session.invalidate();
 
 	}
@@ -310,7 +330,9 @@ public class RestApi {
 		} else {
 			return "Failed to pick up item";
 		}
+
 		dao.update(p.getPlayerData());
+
 		return "You took the item";
 	}
 
@@ -339,26 +361,28 @@ public class RestApi {
 				Encounter en = (Encounter) ev;
 
 				sb.append("You see a " + en.getDescription());
+				if (en.getNonPlayableCharacter() instanceof FightableCharacter) {
 
-				FightableCharacter t = en.getNonPlayableCharacter();
-				session.setAttribute(DEFAULT_NPC_TAG, t);
+					FightableCharacter t = en.getNonPlayableCharacter();
+					session.setAttribute(DEFAULT_NPC_TAG, t);
 
-				if (en.isFriendly()) {
-					sb.append(en.getDescription() + " appears to be friendly");
-					sb.append("What do you do?");
-					session.setAttribute(DEFAULT_COMBAT_TAG, false);
+					if (en.isFriendly()) {
+						sb.append(en.getDescription() + " appears to be friendly");
+						sb.append("What do you do?");
+						session.setAttribute(DEFAULT_COMBAT_TAG, false);
 
-					if (en instanceof Shop) {
-						session.setAttribute(DEFAULT_SHOP_TAG, true);
+						if (en instanceof Shop) {
+							session.setAttribute(DEFAULT_SHOP_TAG, true);
+						} else {
+							session.setAttribute(DEFAULT_SHOP_TAG, false);
+						}
+
 					} else {
+						sb.append(en.getDescription() + " charges you! DEFEND!");
+						session.setAttribute(DEFAULT_COMBAT_TAG, true);
 						session.setAttribute(DEFAULT_SHOP_TAG, false);
+
 					}
-
-				} else {
-					sb.append(en.getDescription() + " charges you! DEFEND!");
-					session.setAttribute(DEFAULT_COMBAT_TAG, true);
-					session.setAttribute(DEFAULT_SHOP_TAG, false);
-
 				}
 
 			} else if (ev instanceof ChestEvent) {

@@ -39,26 +39,37 @@ public class Player implements FightableCharacter {
 		
 		InventoryManager.getInstance().addItem(this.playerData.getCs().getInventory(),
 				new Weapon("Wooden stick", "Blunt", 7, 4, 6, elements, new ArrayList<>(), true));
-
+		
+		InventoryManager.getInstance().addItem(this.playerData.getCs().getInventory(),
+				new Weapon("Sick sword", "Blunt", 14, 10, 78, elements, new ArrayList<>(), false));
+		
+		InventoryManager.getInstance().addItem(this.playerData.getCs().getInventory(),
+				new Armor("Wooden chestpiece", 8, "wood", 2, true));
+		
+		InventoryManager.getInstance().addItem(this.playerData.getCs().getInventory(),
+				new Armor("iron chestpiece", 8, "iron", 26, false));
+		
+		InventoryManager.getInstance().addItem(this.playerData.getCs().getInventory(),
+				new Consumable("health pot", "HealthEffect", "hot", 20));
 	}
 
 	public Player(PlayerData playerData) {
 		this.playerData = playerData;
-
+		
 	}
 
 	public int getBaseDamage() {
-		Random ran = new Random();
-		return ran.nextInt(PlayerData.MAX_DAMAGE - PlayerData.MIN_DAMAGE) + PlayerData.MIN_DAMAGE;
+		return RAN.nextInt(PlayerData.MAX_DAMAGE - PlayerData.MIN_DAMAGE) + PlayerData.MIN_DAMAGE;
 	}
 
 	public void useItem() {
 
 	}
 
-	public Inventory showInventory() {
-
-		return null;
+	public Inventory getInventory() {
+		Inventory inv = this.playerData.getCs().getInventory();
+		Inventory exposableInv =  new Inventory(inv);
+		return exposableInv;
 	}
 
 	public void pickUpWeapon(Weapon item) {
@@ -92,7 +103,7 @@ public class Player implements FightableCharacter {
 	public int getDamage() {
 		int dmg = RAN.nextInt(1 + (PlayerData.MAX_DAMAGE - PlayerData.MIN_DAMAGE)) + PlayerData.MIN_DAMAGE;
 
-		return dmg;
+		return dmg + getArmor();
 	}
 
 	@Override

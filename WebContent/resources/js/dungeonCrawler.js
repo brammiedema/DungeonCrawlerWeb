@@ -1,4 +1,5 @@
 $(document).ready(function() {
+	$("#inventory_jumbotron").toggle();
 	// ////////////
 	// HANDLERS //
 	// ////////////
@@ -61,10 +62,85 @@ $(document).ready(function() {
 		});
 
 	});
-	
-	$("#close_inventory_button").click(function(e) {
-		$("#inventory_jumbotron").hide();
+
+	$("#open_inventory").click(function(e) {
+		$("#inventory_jumbotron").toggle();
+		$('#inventory_content_weapons_table').DataTable().destroy();
+		$('#inventory_content_consumables_table').DataTable().destroy();
+		$('#inventory_content_armor_table').DataTable().destroy();
+		initInventory();
 	});
+
+	function initWeapons(weapons) {
+
+		$('#inventory_content_weapons_table').DataTable({
+			data : weapons,
+			columns : [ {
+				"data" : "id",
+				"visible" : false
+			}, {
+				"className" : "weapon_name",
+				"data" : "name"
+			}, {
+				"data" : "type"
+			}, {
+				"data" : "maxDmg"
+			}, {
+				"data" : "minDmg"
+			}, {
+				"data" : "price",
+			} ]
+		});
+	}
+
+	function initConsumables(consumables) {
+		$('#inventory_content_consumables_table').DataTable({
+			data : consumables,
+			columns : [ {
+				"data" : "id",
+				"visible" : false
+			}, {
+				"className" : "consumable_name",
+				"data" : "name"
+			}, {
+				"data" : "type"
+			}, {
+				"data" : "effect"
+			}, {
+				"data" : "price"
+			} ]
+		});
+	}
+
+	function initArmor(armor) {
+		$('#inventory_content_armor_table').DataTable({
+			data : armor,
+			columns : [ {
+				"data" : "id",
+				"visible" : false
+			}, {
+				"className" : "armor_name",
+				"data" : "name"
+			}, {
+				"data" : "type"
+			}, {
+				"data" : "armor"
+			}, {
+				"data" : "price"
+			} ]
+		});
+	}
+
+	function initInventory(e) {
+		$.get("api/inventory", function(data) {
+
+			var dataObj = JSON.parse(data);
+			initArmor(dataObj.armors);
+			initWeapons(dataObj.weapons);
+			initConsumables(dataObj.consumables);
+
+		});
+	}
 
 	$("#move_south_button").click(function(e) {
 
@@ -72,6 +148,7 @@ $(document).ready(function() {
 			$("#game_input").append(data + "<br />");
 			updateScroll();
 		});
+		$("#inventory_content").find("p:first").append(weaponDiv);
 
 	});
 

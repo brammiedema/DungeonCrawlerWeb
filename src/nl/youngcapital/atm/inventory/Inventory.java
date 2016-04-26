@@ -32,6 +32,16 @@ public class Inventory {
 
 	private long id;
 	
+	public Inventory(){
+		super();
+	}
+
+	public Inventory(Inventory inv){
+		this.armors = inv.getArmors();
+		this.weapons = inv.getWeapons();
+		this.consumables = inv.getConsumables();
+	}
+	
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@OneToMany(cascade = {CascadeType.ALL})
 	@JoinColumn(name = "inventory_id")

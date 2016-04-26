@@ -37,5 +37,8 @@
 	<div>
 		<button id="attack" type="button" class="btn btn-danger">Attack</button>
 	</div>
+	<div>
+		<button id="open_inventory" type="button" class="btn btn-warning">Inventory</button>
+	</div>
 	
 </div>
